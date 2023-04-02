@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func TestAddingMiddleware(t *testing.T) {
@@ -58,4 +59,32 @@ func TestMiddlewareEarlyReturn(t *testing.T) {
 		t.Errorf("the body response did not match the expected body: %s != %s", string(b), "hello from handler")
 	}
 
+}
+
+func TestMiddlewareOrdering(t *testing.T) {
+	p := New()
+	p.Handle("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("hello from handler"))
+	})
+	var firstMiddlewareCalled time.Time
+	p.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			firstMiddlewareCalled = time.Now()
+			next.ServeHTTP(w, r)
+		})
+	})
+	var secondMiddlewareCalled time.Time
+	p.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			secondMiddlewareCalled = time.Now()
+			next.ServeHTTP(w, r)
+		})
+	})
+	req := httptest.NewRequest("GET", "https://lukaswerner.com/", nil)
+	resp := httptest.NewRecorder()
+	p.ServeHTTP(resp, req)
+
+	if secondMiddlewareCalled.Before(firstMiddlewareCalled) {
+		t.Error("seccond middleware was called before first middleware was called")
+	}
 }
