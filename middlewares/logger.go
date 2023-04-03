@@ -11,6 +11,9 @@ type LoggerConfig struct {
 	l *log.Logger
 }
 
+// HTTPLogger Logs the HTTP Request/Responses in the following
+//
+// format: 2023/04/02 12:48:37 host: localhost:8080 method: GET uri: / status: 200 Ok
 func HTTPLogger() pine.MiddlewareFunc {
 	c := LoggerConfig{}
 	c.l = log.Default()

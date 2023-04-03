@@ -40,6 +40,14 @@ func (wb *responseWriterBuffer) Copy(w http.ResponseWriter) {
 	io.Copy(w, wb.bodyBuffer)
 }
 
+// STolinskiTiming (slow, middle) is a middleware that buckets the time it takes for http responses
+// to get fullfilled. If the request is slower than the slow time then it inserts a turtle...
+// into the X-Duration header and if it is faster than the slow and slower than middle
+// then it gets a rabbit.. in the header otherwise it gets a rocket!
+//
+// example:
+// p := pine.New()
+// p.Use(middlewares.STolinskiTiming(time.Second, time.Second/3))
 func STolinskiTiming(slow time.Duration, middle time.Duration) pine.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
