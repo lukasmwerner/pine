@@ -23,6 +23,7 @@ func New() *router {
 			Name:     "root",
 		},
 		NotFoundHandler: http.HandlerFunc(notFoundHandler),
+		Middlewares:     []MiddlewareFunc{},
 	}
 }
 
@@ -30,9 +31,12 @@ func Var(r *http.Request, k string) string {
 	return r.Context().Value("pine:" + k).(string)
 }
 
+type MiddlewareFunc func(http.Handler) http.Handler
+
 type router struct {
 	RootNode        *node
 	NotFoundHandler http.Handler
+	Middlewares     []MiddlewareFunc
 }
 
 func (r *router) Handle(tpl string, handler http.HandlerFunc) {
@@ -71,16 +75,23 @@ func (r *router) Handle(tpl string, handler http.HandlerFunc) {
 	}
 }
 
+func (r *router) Use(middleware MiddlewareFunc) {
+	r.Middlewares = append(r.Middlewares, middleware)
+}
+
 func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	handler := findMatchingHandler(r.RootNode, req)
 	if handler == nil {
-		r.NotFoundHandler.ServeHTTP(w, req)
-		return
+		handler = r.NotFoundHandler
 	}
 	varsMap := makeVarsFromRequest(r.RootNode, req)
 	ctx := req.Context()
 	for k, v := range varsMap {
 		ctx = context.WithValue(ctx, "pine:"+k, v)
+	}
+
+	for i := len(r.Middlewares) - 1; i >= 0; i-- {
+		handler = r.Middlewares[i](handler)
 	}
 	handler.ServeHTTP(w, req.WithContext(ctx))
 }

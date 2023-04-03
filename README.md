@@ -17,12 +17,35 @@ p.Handle("/hello/{name}", func(w http.ResponseWriter, r *http.Request) {
 log.Fatalln(http.ListenAndServe(":8080", p))
 ```
 
+### Handler Routing
+All handlers are parsed in first to last definition order (e.g. if you have a variable in the folder defined first that will run first)
+
+
+### Middlewares
+Gorilla/Mux style middlewares are supported by the type `pine.MiddlewareFunc` which is just a `func(http.Handler) http.Handler` under the hood.
+
+Usage:
+```go
+p := pine.New()
+p.Use(func(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		// make sure to call `next` otherwise the handler will not get called
+		next.ServeHTTP(w, r)
+	})
+})
+```
+Note: Middlewares are run in order of being added
+
+There are a few pre-made middlewares that are defined in the `middlewares` package such as:
+* `middlewares.HTTPLogger` Logs the HTTP Request/Responses in the following format: `2023/04/02 12:48:37 host: localhost:8080 method: GET uri: / status: 200 Ok`
+* `middlewares.STolinskiTiming` Puts the requests into different time buckets such based on the (slow, middle) durations passed. Inserts a `X-Duration` header to based on those timing buckets
 
 
 ## Scope
 * [x] routing based on paths
 * [x] variables on paths
-* [ ] middlewares
+* [x] middlewares
 
 
 ### Soundtrack while developing this project
