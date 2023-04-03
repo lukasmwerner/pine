@@ -1,7 +1,7 @@
 ![Logo](./images/Pine_Logo_Dark.png#gh-dark-mode-only)
 ![Logo](./images/Pine_Logo_Light.png#gh-light-mode-only)
 An all natural tree based router from Oregon
-
+---
 After seeing the unfortunate news that [gorilla/mux](https://github.com/gorilla/mux) was archived I needed a new router. After not seeing anything that felt quite like that I decided to build my own.
 
 ## Usage
