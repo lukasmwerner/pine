@@ -39,12 +39,13 @@ Note: Middlewares are run in order of being added
 
 There are a few pre-made middlewares that are defined in the `middlewares` package such as:
 * `middlewares.HTTPLogger` Logs the HTTP Request/Responses in the following format: `2023/04/02 12:48:37 host: localhost:8080 method: GET uri: / status: 200 Ok`
+* `middlewares.STolinskiTiming` Puts the requests into different time buckets such based on the (slow, middle) durations passed. Inserts a `X-Duration` header to based on those timing buckets
 
 
 ## Scope
 * [x] routing based on paths
 * [x] variables on paths
-* [ ] middlewares
+* [x] middlewares
 
 
 ### Soundtrack while developing this project
