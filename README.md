@@ -10,7 +10,7 @@ To install run `go get github.com/lukasmwerner/pine`
 Example Usage for the router:
 ```go
 p := pine.New()
-p.Handle("/hello/{name}", func(w http.ResponseWriter, r *http.Request) {
+p.HandleFunc("/hello/{name}", func(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	w.Write([]byte(fmt.Sprintf("Hello, %s", pine.Var(r, "name"))))
 })
@@ -53,6 +53,7 @@ There are a few pre-made middlewares that are defined in the `middlewares` packa
 * Firewatch Soundtrack - Chris Remo
 * Discovery - Daft Punk
 * Tron: Legacy - Daft Punk
+* Guardians of the Galaxy Vol. 2
 
 
 ## Contributions

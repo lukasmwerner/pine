@@ -39,40 +39,14 @@ type router struct {
 	Middlewares     []MiddlewareFunc
 }
 
-func (r *router) Handle(tpl string, handler http.HandlerFunc) {
-	path_parts := strings.Split(tpl, "/")[1:]
+// HandleFunc Inserts a handler function for all HTTP methods relating to the specified path
+func (r *router) HandleFunc(tpl string, handler http.HandlerFunc) {
+	insertHandlerForAllMethods(r.RootNode, tpl, http.HandlerFunc(handler))
+}
 
-	// 1. find the farthest node
-	var farthest *node = r.RootNode
-	farthest, count := findMatchingPathNode(r.RootNode, path_parts, 0)
-
-	// 2. insert as much as needed
-	path_parts_to_insert := path_parts[count:]
-	for len(path_parts_to_insert) > 0 {
-		path_part := path_parts_to_insert[0]
-		new_node := &node{
-			children: []*node{},
-			Path:     path_part,
-		}
-		if variableRegex.MatchString(path_part) {
-			new_node.Path = ""
-			new_node.variable = variableRegex.FindStringSubmatch(path_part)[1]
-		}
-
-		farthest.children = append(farthest.children, new_node)
-		path_parts_to_insert = path_parts_to_insert[1:] // pop off the left
-		farthest = new_node
-	}
-
-	// 3. insert all methods for leaves
-	for _, method := range allMethods {
-		new_node := &node{
-			Method:   method,
-			children: []*node{},
-			handler:  http.HandlerFunc(handler),
-		}
-		farthest.children = append(farthest.children, new_node)
-	}
+// Handle Inserts a http.Handler for all HTTP methods relating to the specified path
+func (r *router) Handle(tpl string, handler http.Handler) {
+	insertHandlerForAllMethods(r.RootNode, tpl, handler)
 }
 
 func (r *router) Use(middleware MiddlewareFunc) {
@@ -167,4 +141,40 @@ func makeVarsFromRequest(start *node, r *http.Request) map[string]string {
 	}
 
 	return vars
+}
+
+func insertHandlerForAllMethods(root *node, tmpl string, handler http.Handler) {
+	path_parts := strings.Split(tmpl, "/")[1:]
+
+	// 1. find the farthest node
+	var farthest *node = root
+	farthest, count := findMatchingPathNode(root, path_parts, 0)
+
+	// 2. insert as much as needed
+	path_parts_to_insert := path_parts[count:]
+	for len(path_parts_to_insert) > 0 {
+		path_part := path_parts_to_insert[0]
+		new_node := &node{
+			children: []*node{},
+			Path:     path_part,
+		}
+		if variableRegex.MatchString(path_part) {
+			new_node.Path = ""
+			new_node.variable = variableRegex.FindStringSubmatch(path_part)[1]
+		}
+
+		farthest.children = append(farthest.children, new_node)
+		path_parts_to_insert = path_parts_to_insert[1:] // pop off the left
+		farthest = new_node
+	}
+
+	// 3. insert all methods for leaves
+	for _, method := range allMethods {
+		new_node := &node{
+			Method:   method,
+			children: []*node{},
+			handler:  handler,
+		}
+		farthest.children = append(farthest.children, new_node)
+	}
 }
