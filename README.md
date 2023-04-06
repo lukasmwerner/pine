@@ -44,9 +44,9 @@ There are a few pre-made middlewares that are defined in the `middlewares` packa
 
 ### Examples Projects:
 
-* lukasmwerner/shakespeareswords
-* lukasmwerner/pine/examples/markdown-server
-* lukasmwerner/pine/examples/hello-world
+* [lukasmwerner/shakespeareswords](https://github.com/lukasmwerner/shakespeareswords)
+* [lukasmwerner/pine/examples/markdown-server](https://github.com/lukasmwerner/pine/tree/main/examples/markdown-server)
+* [lukasmwerner/pine/examples/hello-world](https://github.com/lukasmwerner/pine/tree/main/examples/hello-world)
 
 ## Scope
 * [x] routing based on paths
